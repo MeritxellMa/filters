@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.revert:
                 revertFilters();
+                mGPUImage.revert();
                 break;
             case R.id.brightness:
                 setButton(brightnessButton);

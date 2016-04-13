@@ -78,6 +78,15 @@ public class MyGPUImage extends GPUImage {
         this.scaleFactor = scaleFactor;
         setImage(uri);
     }
+    public void revert() {
+        this.degrees = 0;
+        this.scaleFactor = 1;
+        if (mUri != null) {
+            setImage(mUri);
+        }else{
+            Log.i("Error setting degrees:","Set an image first");
+        }
+    }
 
     public void setDegrees(float degrees) {
         this.degrees = degrees;
