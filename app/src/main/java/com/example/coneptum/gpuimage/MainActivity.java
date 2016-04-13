@@ -20,7 +20,7 @@ import jp.co.cyberagent.android.gpuimage.GPUImageSaturationFilter;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
 
-    private GPUImage mGPUImage;
+    private MyGPUImage mGPUImage;
     private Button revertButton;
     private ToggleButton brightnessButton;
     private ToggleButton colorButton;
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         Uri uri = Uri.parse("android.resource://com.example.coneptum.gpuimage/drawable/image");
-        mGPUImage = new GPUImage(this);
+        mGPUImage = new MyGPUImage(this);
         mGPUImage.setGLSurfaceView((GLSurfaceView) findViewById(R.id.surface_view));
         mGPUImage.setScaleType(GPUImage.ScaleType.CENTER_INSIDE);
         mGPUImage.setImage(uri); // this loads image on the current thread, should be run in a thread
