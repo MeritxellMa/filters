@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -30,6 +31,7 @@ public class MyGPUImage extends GPUImage {
     private GPUImageRenderer mRenderer;
     private Bitmap mCurrentBitmap;
     private ScaleType mScaleType;
+    private Uri mUri;
 
     /**
      * Instantiates a new GPUImage object.
@@ -40,6 +42,7 @@ public class MyGPUImage extends GPUImage {
         super(context);
         mContext = context;
         mScaleType = ScaleType.CENTER_CROP;
+        scaleFactor=1;
 
         try {
             GPUImage object = new GPUImage(context);
@@ -66,6 +69,7 @@ public class MyGPUImage extends GPUImage {
 
     @Override
     public void setImage(Uri uri) {
+        mUri = uri;
         new LoadImageUriTask(this, uri).execute();
     }
 
@@ -73,6 +77,24 @@ public class MyGPUImage extends GPUImage {
         this.degrees = degrees;
         this.scaleFactor = scaleFactor;
         setImage(uri);
+    }
+
+    public void setDegrees(float degrees) {
+        this.degrees = degrees;
+        if (mUri != null) {
+            setImage(mUri);
+        }else{
+            Log.i("Error setting degrees:","Set an image first");
+        }
+    }
+
+    public void setScaleFactor(float scaleFactor) {
+        this.scaleFactor = scaleFactor;
+        if (mUri != null) {
+            setImage(mUri);
+        }else{
+            Log.i("Error setting scale:","Set an image first");
+        }
     }
 
     private int getOutputWidth() {
@@ -244,11 +266,13 @@ public class MyGPUImage extends GPUImage {
             float newWidth;
             float newHeight;
 
-            float withRatio = (float) width / mOutputWidth;
+            float widthRatio = (float) width / mOutputWidth;
             float heightRatio = (float) height / mOutputHeight;
 
             boolean adjustWidth = mScaleType == ScaleType.CENTER_CROP
-                    ? withRatio > heightRatio : withRatio < heightRatio;
+                    ? widthRatio > heightRatio : widthRatio < heightRatio;
+            Log.i("width / mOutputWidth", widthRatio + "");
+            Log.i("height / mOutputHeight", heightRatio + "");
 
             if (adjustWidth) {
                 newHeight = mOutputHeight;
@@ -257,6 +281,8 @@ public class MyGPUImage extends GPUImage {
                 newWidth = mOutputWidth;
                 newHeight = (newWidth / width) * height;
             }
+            newHeight *= scaleFactor;
+            newWidth *= scaleFactor;
             return new int[]{Math.round(newWidth), Math.round(newHeight)};
         }
 

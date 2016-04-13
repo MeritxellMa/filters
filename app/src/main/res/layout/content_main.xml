@@ -10,6 +10,7 @@
 
     <android.opengl.GLSurfaceView
         android:id="@+id/surface_view"
+        android:layout_below="@+id/buttonTest"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -22,6 +23,46 @@
         android:progress="100"
         android:visibility="invisible" />
 
+    <LinearLayout
+        android:id="@id/buttonTest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/degrees"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/rotate_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Rotate" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/scale_factor"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/scale_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Scale" />
+        </LinearLayout>
+    </LinearLayout>
     <LinearLayout
         android:id="@id/buttonPanel"
         android:layout_width="match_parent"

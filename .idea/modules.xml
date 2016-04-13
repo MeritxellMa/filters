@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/GPUImage.iml" filepath="$PROJECT_DIR$/GPUImage.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ucrop/ucrop.iml" filepath="$PROJECT_DIR$/ucrop/ucrop.iml" />
     </modules>
   </component>
 </project>

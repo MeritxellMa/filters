@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
@@ -35,18 +36,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private float saturation;
     private float contrast;
     private float monocolor;
-
+    private Button scaleButton;
+    private Button rotateButton;
+    private EditText scaleFactor;
+    private EditText degrees;
+    private Uri mUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Uri uri = Uri.parse("android.resource://com.example.coneptum.gpuimage/drawable/image");
+        mUri = Uri.parse("android.resource://com.example.coneptum.gpuimage/drawable/image");
         mGPUImage = new MyGPUImage(this);
         mGPUImage.setGLSurfaceView((GLSurfaceView) findViewById(R.id.surface_view));
         mGPUImage.setScaleType(GPUImage.ScaleType.CENTER_INSIDE);
-        mGPUImage.setImage(uri); // this loads image on the current thread, should be run in a thread
+       // mGPUImage.setImage(uri); // this loads image on the current thread, should be run in a thread
+
+        mGPUImage.setImage(mUri);
 
         seekbar = (SeekBar) findViewById(R.id.seekbar);
         seekbar.setMax(200);
@@ -62,6 +69,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         colorButton.setOnClickListener(this);
         monoColorButton.setOnClickListener(this);
 
+        //testing scale and rotate
+        scaleButton=(Button)findViewById(R.id.scale_button);
+        rotateButton=(Button)findViewById(R.id.rotate_button);
+        scaleFactor=(EditText)findViewById(R.id.scale_factor);
+        degrees=(EditText)findViewById(R.id.degrees);
+
+        scaleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                float factorToScale=Float.parseFloat(scaleFactor.getText().toString());
+                mGPUImage.setScaleFactor(factorToScale);
+            }
+        });
+
+        rotateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                float degreesToRotate=Float.parseFloat(degrees.getText().toString());
+                mGPUImage.setDegrees(degreesToRotate);
+            }
+        });
 
         brightnessFilter = new GPUImageBrightnessFilter();
         saturationFilter = new GPUImageSaturationFilter();
@@ -72,8 +100,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //setInitFilterValues();
         setImageGroupFilters();
-
-
     }
 
     private void setImageGroupFilters() {
