@@ -1,17 +1,14 @@
 package com.example.coneptum.gpuimage;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.view.Display;
 import android.view.WindowManager;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -27,8 +24,8 @@ import jp.co.cyberagent.android.gpuimage.GPUImageRenderer;
 public class MyGPUImage extends GPUImage {
 
     private final Context mContext;
-    private double degrees;
-   private int pan;
+    private float degrees;
+    private int pan;
     private float scaleFactor;
     private GPUImageRenderer mRenderer;
     private Bitmap mCurrentBitmap;
@@ -42,7 +39,7 @@ public class MyGPUImage extends GPUImage {
     public MyGPUImage(Context context) {
         super(context);
         mContext = context;
-        mScaleType=ScaleType.CENTER_CROP;
+        mScaleType = ScaleType.CENTER_CROP;
 
         try {
             GPUImage object = new GPUImage(context);
@@ -72,9 +69,9 @@ public class MyGPUImage extends GPUImage {
         new LoadImageUriTask(this, uri).execute();
     }
 
-    public void setImage(Uri uri, double degrees, float scaleFactor){
-        this.degrees=degrees;
-        this.scaleFactor=scaleFactor;
+    public void setImage(Uri uri, float degrees, float scaleFactor) {
+        this.degrees = degrees;
+        this.scaleFactor = scaleFactor;
         setImage(uri);
     }
 
@@ -276,22 +273,19 @@ public class MyGPUImage extends GPUImage {
                 return null;
             }
             Bitmap rotatedBitmap = bitmap;
-            try {
-                int orientation = getImageOrientation();
-                if (orientation != 0) {
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(orientation);
-                    rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-                            bitmap.getHeight(), matrix, true);
-                    bitmap.recycle();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+
+            float orientation = degrees;
+            if (orientation != 0) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(orientation);
+                rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                        bitmap.getHeight(), matrix, true);
+                bitmap.recycle();
             }
+
             return rotatedBitmap;
         }
 
-        protected abstract int getImageOrientation() throws IOException;
     }
 
     private class LoadImageUriTask extends LoadImageTask {
@@ -319,20 +313,6 @@ public class MyGPUImage extends GPUImage {
             return null;
         }
 
-        @Override
-        protected int getImageOrientation() throws IOException {
-            Cursor cursor = mContext.getContentResolver().query(mUri,
-                    new String[]{MediaStore.Images.ImageColumns.ORIENTATION}, null, null, null);
-
-            if (cursor == null || cursor.getCount() != 1) {
-                return 0;
-            }
-
-            cursor.moveToFirst();
-            int orientation = cursor.getInt(0);
-            cursor.close();
-            return orientation;
-        }
     }
 
 
