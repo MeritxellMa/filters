@@ -18,6 +18,7 @@ import jp.co.cyberagent.android.gpuimage.GPUImageContrastFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageFilterGroup;
 import jp.co.cyberagent.android.gpuimage.GPUImageMonochromeFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageSaturationFilter;
+import jp.co.cyberagent.android.gpuimage.Rotation;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
 
@@ -38,8 +39,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private float monocolor;
     private Button scaleButton;
     private Button rotateButton;
+    private Button panButton;
     private EditText scaleFactor;
     private EditText degrees;
+    private EditText panX;
+    private EditText panY;
     private Uri mUri;
 
     @Override
@@ -50,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mUri = Uri.parse("android.resource://com.example.coneptum.gpuimage/drawable/image");
         mGPUImage = new MyGPUImage(this);
         mGPUImage.setGLSurfaceView((GLSurfaceView) findViewById(R.id.surface_view));
-        mGPUImage.setScaleType(GPUImage.ScaleType.CENTER_INSIDE);
+        mGPUImage.setScaleType(GPUImage.ScaleType.CENTER_CROP);
        // mGPUImage.setImage(uri); // this loads image on the current thread, should be run in a thread
 
         mGPUImage.setImage(mUri);
@@ -69,9 +73,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         colorButton.setOnClickListener(this);
         monoColorButton.setOnClickListener(this);
 
-        //testing scale and rotate
+        //testing scale, translate and rotate
         scaleButton=(Button)findViewById(R.id.scale_button);
         rotateButton=(Button)findViewById(R.id.rotate_button);
+        panButton=(Button)findViewById(R.id.pan_button);
+        panX=(EditText)findViewById(R.id.panX);
+        panY=(EditText)findViewById(R.id.panY);
         scaleFactor=(EditText)findViewById(R.id.scale_factor);
         degrees=(EditText)findViewById(R.id.degrees);
 
@@ -91,6 +98,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        panButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int panDistanceX=Integer.parseInt(panX.getText().toString());
+                int panDistanceY=Integer.parseInt(panY.getText().toString());
+                mGPUImage.setPan(panDistanceX, panDistanceY);
+            }
+        });
+
+        Button inc90=(Button)findViewById(R.id.inc90);
+        assert inc90 != null;
+        inc90.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mGPUImage.setRotation(Rotation.ROTATION_90);
+                mGPUImage.setFilter(brightnessFilter);
+            }
+        });
+
+        //filters
         brightnessFilter = new GPUImageBrightnessFilter();
         saturationFilter = new GPUImageSaturationFilter();
         contrastFilter = new GPUImageContrastFilter();

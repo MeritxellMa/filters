@@ -17,7 +17,9 @@ import java.lang.reflect.Method;
 import java.net.URL;
 
 import jp.co.cyberagent.android.gpuimage.GPUImage;
+import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageRenderer;
+import jp.co.cyberagent.android.gpuimage.Rotation;
 
 /**
  * Created by coneptum on 13/04/16.
@@ -26,9 +28,10 @@ public class MyGPUImage extends GPUImage {
 
     private final Context mContext;
     private float degrees;
-    private int pan;
+    private int panX;
+    private int panY;
     private float scaleFactor;
-    private GPUImageRenderer mRenderer;
+    private MyRenderer mRenderer;
     private Bitmap mCurrentBitmap;
     private ScaleType mScaleType;
     private Uri mUri;
@@ -42,16 +45,23 @@ public class MyGPUImage extends GPUImage {
         super(context);
         mContext = context;
         mScaleType = ScaleType.CENTER_CROP;
-        scaleFactor=1;
+        scaleFactor = 1;
+        panX=0;
+        panY=0;
+
 
         try {
             GPUImage object = new GPUImage(context);
 
             //assignem el renderer (private) de gpuimage al nostre
-            Field privateField = GPUImage.class.
+            /*Field privateField = GPUImage.class.
                     getDeclaredField("mRenderer");
             privateField.setAccessible(true);
-            mRenderer = (GPUImageRenderer) privateField.get(object);
+            mRenderer = (GPUImageRenderer) privateField.get(object);*/
+            Field privateField = GPUImage.class.
+                    getDeclaredField("mFilter");
+            privateField.setAccessible(true);
+            mRenderer=new MyRenderer((GPUImageFilter) privateField.get(object));
 
             //assignem el bitmap (private) al nostre
             Field privateField2 = GPUImage.class.
@@ -81,6 +91,7 @@ public class MyGPUImage extends GPUImage {
     public void revert() {
         this.degrees = 0;
         this.scaleFactor = 1;
+        setRotation(Rotation.NORMAL);
         if (mUri != null) {
             setImage(mUri);
         }else{
@@ -174,6 +185,16 @@ public class MyGPUImage extends GPUImage {
         return returnHeight;
     }
 
+    public void setPan(int panX, int panY) {
+        this.panX = panX;
+        this.panY=panY;
+        if (mUri != null) {
+            setImage(mUri);
+        } else {
+            Log.i("Error setting pan:", "Set an image first");
+        }
+    }
+
 
     private abstract class LoadImageTask extends AsyncTask<Void, Void, Bitmap> {
 
@@ -235,6 +256,7 @@ public class MyGPUImage extends GPUImage {
             }
             bitmap = rotateImage(bitmap);
             bitmap = scaleBitmap(bitmap);
+            bitmap = moveImage(bitmap);
             return bitmap;
         }
 
@@ -249,7 +271,7 @@ public class MyGPUImage extends GPUImage {
                 bitmap = workBitmap;
                 System.gc();
             }
-
+/*
             if (mScaleType == ScaleType.CENTER_CROP) {
                 // Crop it
                 int diffWidth = newSize[0] - mOutputWidth;
@@ -260,7 +282,7 @@ public class MyGPUImage extends GPUImage {
                     bitmap.recycle();
                     bitmap = workBitmap;
                 }
-            }
+            }*/
 
             return bitmap;
         }
@@ -290,8 +312,15 @@ public class MyGPUImage extends GPUImage {
                 newWidth = mOutputWidth;
                 newHeight = (newWidth / width) * height;
             }
-            newHeight *= scaleFactor;
-            newWidth *= scaleFactor;
+
+            if (scaleFactor >= 1) {
+
+                newHeight *= scaleFactor;
+                newWidth *= scaleFactor;
+            }
+            Log.i("scaleImagewidth", newWidth + "");
+            Log.i("scaleImageHeight", newHeight + "");
+
             return new int[]{Math.round(newWidth), Math.round(newHeight)};
         }
 
@@ -319,6 +348,42 @@ public class MyGPUImage extends GPUImage {
             }
 
             return rotatedBitmap;
+        }
+
+        private Bitmap moveImage(final Bitmap bitmap) {
+            if (bitmap == null) {
+                return null;
+            }
+            Bitmap movedBitmap = bitmap;
+            Matrix matrix = new Matrix();
+            //matrix.postTranslate(pan, pan);
+
+            Log.i("panX", panX+"");
+            Log.i("panY", panY+"");
+            Log.i("bitmapWidth", bitmap.getWidth()+"");
+            Log.i("bitmapHeight", bitmap.getHeight()+"");
+            Log.i("bitmapWidth -panX", bitmap.getWidth()-panX+"");
+            Log.i("bitmapHeight-panY", bitmap.getHeight() - panY + "");
+            Log.i("bitmap null?", (bitmap==null)+"");
+
+/*
+            if(bitmap.getHeight()-panY>0&&bitmap.getWidth()-panX>0) {
+                setScaleType(ScaleType.CENTER_CROP);
+                movedBitmap = Bitmap.createBitmap(bitmap, panX, panY, bitmap.getWidth()-panX,
+                        bitmap.getHeight()-panY, matrix, true);
+                bitmap.recycle();
+            }*/
+/*            else{
+                panX=bitmap.getWidth()+1;
+                panY=bitmap.getHeight()+1;
+                movedBitmap = Bitmap.createBitmap(bitmap, panX, panY, bitmap.getWidth() - panX,
+                        bitmap.getHeight() - panY, matrix, true);
+            }*/
+
+
+
+
+            return movedBitmap;
         }
 
     }

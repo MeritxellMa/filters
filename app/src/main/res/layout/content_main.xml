@@ -10,9 +10,9 @@
 
     <android.opengl.GLSurfaceView
         android:id="@+id/surface_view"
-        android:layout_below="@+id/buttonTest"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonTest" />
 
     <SeekBar
         android:id="@+id/seekbar"
@@ -27,43 +27,86 @@
         android:id="@id/buttonTest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <EditText
                 android:id="@+id/degrees"
                 android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_height="wrap_content" />
+                android:inputType="number" />
+
             <Button
                 android:id="@+id/rotate_button"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Rotate" />
+            <Button
+                android:id="@+id/inc90"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:text="90"
+                />
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <EditText
                 android:id="@+id/scale_factor"
                 android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_height="wrap_content" />
+                android:inputType="number" />
+
             <Button
                 android:id="@+id/scale_button"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Scale" />
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/panX"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="panX"
+                android:inputType="number" />
+
+            <EditText
+                android:id="@+id/panY"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="panY"
+
+                android:inputType="number" />
+
+            <Button
+                android:id="@+id/pan_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="pan" />
+        </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:id="@id/buttonPanel"
         android:layout_width="match_parent"
@@ -74,32 +117,32 @@
         <Button
             android:id="@+id/revert"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="revert" />
 
         <ToggleButton
             android:id="@+id/brightness"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:textOn="brillo"
-            android:textOff="brillo"/>
+            android:layout_weight="1"
+            android:textOff="brillo"
+            android:textOn="brillo" />
 
         <ToggleButton
             android:id="@+id/color"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:textOn="color"
-            android:textOff="color"/>
+            android:layout_weight="1"
+            android:textOff="color"
+            android:textOn="color" />
 
         <ToggleButton
             android:id="@+id/monocolor"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:textOn="mono"
-            android:textOff="mono"/>
+            android:layout_weight="1"
+            android:textOff="mono"
+            android:textOn="mono" />
     </LinearLayout>
 </RelativeLayout>
