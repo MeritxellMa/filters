@@ -8,11 +8,58 @@
     tools:context="com.example.coneptum.gpuimage.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <LinearLayout
+        android:id="@+id/transformPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal">
+
+        <ToggleButton
+            android:id="@+id/rotate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textOff="rotate"
+            android:textOn="rotate" />
+
+        <ToggleButton
+            android:id="@+id/scale"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textOff="scale"
+            android:textOn="scale" />
+
+        <ToggleButton
+            android:id="@+id/panX"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textOff="panX"
+            android:textOn="panX" />
+        <ToggleButton
+            android:id="@+id/panY"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textOff="panY"
+            android:textOn="panY" />
+    </LinearLayout>
+    <SeekBar
+        android:id="@+id/seekbarRotate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/transformPanel"
+        android:layout_margin="10dp"
+        android:progress="100" />
+
+
     <android.opengl.GLSurfaceView
         android:id="@+id/surface_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/buttonTest" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/seekbarRotate" />
 
     <SeekBar
         android:id="@+id/seekbar"
@@ -23,89 +70,7 @@
         android:progress="100"
         android:visibility="invisible" />
 
-    <LinearLayout
-        android:id="@id/buttonTest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/degrees"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number" />
-
-            <Button
-                android:id="@+id/rotate_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Rotate" />
-            <Button
-                android:id="@+id/inc90"
-                android:layout_height="wrap_content"
-                android:layout_width="0dp"
-                android:layout_weight="0.5"
-                android:text="90"
-                />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/scale_factor"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number" />
-
-            <Button
-                android:id="@+id/scale_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Scale" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/panX"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="panX"
-                android:inputType="number" />
-
-            <EditText
-                android:id="@+id/panY"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="panY"
-
-                android:inputType="number" />
-
-            <Button
-                android:id="@+id/pan_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="pan" />
-        </LinearLayout>
-    </LinearLayout>
 
     <LinearLayout
         android:id="@id/buttonPanel"

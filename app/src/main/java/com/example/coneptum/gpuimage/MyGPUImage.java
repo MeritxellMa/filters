@@ -35,6 +35,7 @@ public class MyGPUImage extends GPUImage {
     private Bitmap mCurrentBitmap;
     private ScaleType mScaleType;
     private Uri mUri;
+    private GPUImageFilter mFilter;
 
     /**
      * Instantiates a new GPUImage object.
@@ -58,10 +59,13 @@ public class MyGPUImage extends GPUImage {
                     getDeclaredField("mRenderer");
             privateField.setAccessible(true);
             mRenderer = (GPUImageRenderer) privateField.get(object);*/
-            Field privateField = GPUImage.class.
+/*            Field privateField = GPUImage.class.
                     getDeclaredField("mFilter");
             privateField.setAccessible(true);
-            mRenderer=new MyRenderer((GPUImageFilter) privateField.get(object));
+            mFilter=(GPUImageFilter) privateField.get(object);*/
+            mFilter=new GPUImageFilter();
+            mRenderer=new MyRenderer(mFilter, mContext);
+
 
             //assignem el bitmap (private) al nostre
             Field privateField2 = GPUImage.class.
@@ -100,12 +104,23 @@ public class MyGPUImage extends GPUImage {
     }
 
     public void setDegrees(float degrees) {
-        this.degrees = degrees;
+       /* this.degrees = degrees;
         if (mUri != null) {
             setImage(mUri);
         }else{
             Log.i("Error setting degrees:","Set an image first");
-        }
+        }*/
+        //mRenderer.setDegrees(degrees);
+        //mFilter=new GPUImageBrightnessFilter(0);
+        setRotation(90);
+        setFilter(mFilter);
+    }
+
+    private void setRotation(float degrees) {
+        Log.d("WARNING", "MyGPUImage setRotation");
+        MyFilter f=new MyFilter();
+        setFilter(f);
+        //mRenderer.setRotation(degrees, mCurrentBitmap);
     }
 
     public void setScaleFactor(float scaleFactor) {
@@ -228,6 +243,7 @@ public class MyGPUImage extends GPUImage {
             super.onPostExecute(bitmap);
             mGPUImage.deleteImage();
             mGPUImage.setImage(bitmap);
+            mCurrentBitmap=bitmap;
         }
 
         protected abstract Bitmap decode(BitmapFactory.Options options);
