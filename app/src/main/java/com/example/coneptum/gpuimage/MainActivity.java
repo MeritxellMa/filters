@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
@@ -20,7 +19,6 @@ import jp.co.cyberagent.android.gpuimage.GPUImageFilterGroup;
 import jp.co.cyberagent.android.gpuimage.GPUImageMonochromeFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageSaturationFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageTransformFilter;
-import jp.co.cyberagent.android.gpuimage.Rotation;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener {
 
@@ -40,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private float saturation;
     private float contrast;
     private float monocolor;
+    private float degrees;
     private ToggleButton scaleButton;
     private ToggleButton rotateButton;
     private ToggleButton panX;
@@ -47,10 +46,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Uri mUri;
     private SeekBar upperSeekbar;
     private GLSurfaceView glSurfaceView;
-    private float[] rotateM=new float[16];
-    private float[] scaleM=new float[16];
-    private float[] panXM=new float[16];
-    private float[] panYM=new float[16];
+    private float[] rotateM = new float[16];
+    private float[] scaleM = new float[16];
+    private float[] panXM = new float[16];
+    private float[] panYM = new float[16];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +58,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mUri = Uri.parse("android.resource://com.example.coneptum.gpuimage/drawable/image");
         mGPUImage = new MyGPUImage(this);
-        glSurfaceView=(GLSurfaceView) findViewById(R.id.surface_view);
+        glSurfaceView = (GLSurfaceView) findViewById(R.id.surface_view);
         mGPUImage.setGLSurfaceView(glSurfaceView);
-        mGPUImage.setScaleType(GPUImage.ScaleType.CENTER_CROP);
-       // mGPUImage.setImage(uri); // this loads image on the current thread, should be run in a thread
+        mGPUImage.setScaleType(GPUImage.ScaleType.CENTER_INSIDE);
+        // mGPUImage.setImage(uri); // this loads image on the current thread, should be run in a thread
 
         mGPUImage.setImage(mUri);
 
@@ -70,28 +69,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         seekbar.setMax(200);
         seekbar.setOnSeekBarChangeListener(this);
 
-        upperSeekbar =(SeekBar)findViewById(R.id.seekbarRotate);
+        upperSeekbar = (SeekBar) findViewById(R.id.seekbarRotate);
         upperSeekbar.setMax(360);
         upperSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(rotateButton.isChecked()){
+                if (rotateButton.isChecked()) {
+                    degrees = progress;
                     Matrix.setRotateM(rotateM, 0, progress, 0, 0, -1f);
                     transformFilter.setTransform3D(rotateM);
-                }else if(scaleButton.isChecked()){
-                    float scaleFactor = (float)(progress)/100+1;
+                } else if (scaleButton.isChecked()) {
+                    //TODO aixo esta pq si no existeix transform3d fa coses molt rares---ineficient...boolean?
+                    if (degrees == 0) {
+                        Matrix.setRotateM(rotateM, 0, 0, 0, 0, -1f);
+                        transformFilter.setTransform3D(rotateM);
+                    }
+
+                    float scaleFactor = (float) (progress) / 100 + 1; // de 1 a 4.6
                     Log.i("scalefactor", scaleFactor + "");
-/*                    transformFilter.setIgnoreAspectRatio(false);
-                    transformFilter.setAnchorTopLeft(false);
-                    Matrix.scaleM(scaleM, 0, scaleFactor, scaleFactor, 0);
-                    transformFilter.setTransform3D(scaleM);*/
-                    //transformFilter.onOutputSizeChanged((int)(glSurfaceView.getWidth()*scaleFactor), (int)(glSurfaceView.getHeight()*scaleFactor));
-                }else if(panX.isChecked()){
-                    Matrix.translateM(panXM, 0, -0.5f, 0, 0);
+                    Matrix.scaleM(scaleM, 0, transformFilter.getTransform3D(), 0, scaleFactor, scaleFactor, 1);
+                    transformFilter.setTransform3D(scaleM);
+                } else if (panX.isChecked()) {
+                    //TODO aixo esta pq si no existeix transform3d fa coses molt rares---ineficient...boolean?
+                    if (degrees == 0) {
+                        Matrix.setRotateM(rotateM, 0, 0, 0, 0, -1f);
+                        transformFilter.setTransform3D(rotateM);
+                    }
+
+                    float panX = (float) (progress) / 180 - 1;
+                    Log.i("panX", panX + "");
+                    Matrix.translateM(panXM, 0, transformFilter.getTransform3D(), 0, panX, 0, 0);
                     transformFilter.setTransform3D(panXM);
 
                 }else{
-
+                    //TODO aixo esta pq si no existeix transform3d fa coses molt rares---ineficient...boolean?
+                    if (degrees == 0) {
+                        Matrix.setRotateM(rotateM, 0, 0, 0, 0, -1f);
+                        transformFilter.setTransform3D(rotateM);
+                    }
+                    float panY = (float) (progress) / 180 - 1;
+                    Log.i("panY", panY + "");
+                    Matrix.translateM(panYM, 0, transformFilter.getTransform3D(), 0, 0, panY, 0);
+                    transformFilter.setTransform3D(panYM);
                 }
                 applyFilters();
             }
@@ -118,14 +137,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         monoColorButton.setOnClickListener(this);
 
         //testing scale, translate and rotate
-        scaleButton=(ToggleButton)findViewById(R.id.scale);
-        rotateButton=(ToggleButton)findViewById(R.id.rotate);
-        panX=(ToggleButton)findViewById(R.id.panX);
-        panY=(ToggleButton)findViewById(R.id.panY);
+        scaleButton = (ToggleButton) findViewById(R.id.scale);
+        rotateButton = (ToggleButton) findViewById(R.id.rotate);
+        panX = (ToggleButton) findViewById(R.id.panX);
+        panY = (ToggleButton) findViewById(R.id.panY);
 
         scaleButton.setOnCheckedChangeListener(this);
         rotateButton.setOnCheckedChangeListener(this);
         panX.setOnCheckedChangeListener(this);
+        panX.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                float[] prova = transformFilter.getTransform3D();
+                Matrix.translateM(prova, 0, panXM, 0, 100, 0, 0);
+                transformFilter.setTransform3D(prova);
+                applyFilters();
+            }
+        });
         panY.setOnCheckedChangeListener(this);
 
 
@@ -133,12 +161,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         brightnessFilter = new GPUImageBrightnessFilter();
         saturationFilter = new GPUImageSaturationFilter();
         contrastFilter = new GPUImageContrastFilter();
-        transformFilter=new GPUImageTransformFilter();
+        transformFilter = new GPUImageTransformFilter();
 
 
         transformFilter.setTransform3D(rotateM);
 
-        float[] monoInitValues = {0.5f,0.5f, 0.5f, 1};
+        float[] monoInitValues = {0.5f, 0.5f, 0.5f, 1};
         monochromeFilter = new GPUImageMonochromeFilter(1, monoInitValues);
 
         //setInitFilterValues();
@@ -154,18 +182,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setInitFilterValues() {
-        brightness=0;
+        brightness = 0;
         brightnessFilter.setBrightness(brightness);
-        saturation=1;
+        saturation = 1;
         saturationFilter.setSaturation(saturation);
-        contrast=1;
+        contrast = 1;
         contrastFilter.setContrast(contrast);
-        monocolor=0.5f;
+        monocolor = 0.5f;
         monochromeFilter.setIntensity(1);
-        float[] monoInitValues = {0.5f,0.5f, 0.5f, 1};
+        float[] monoInitValues = {0.5f, 0.5f, 0.5f, 1};
         monochromeFilter.setColor(monoInitValues);
         transformFilter.onDestroy();
-        transformFilter=new GPUImageTransformFilter();
+        transformFilter = new GPUImageTransformFilter();
         upperSeekbar.setProgress(180);
     }
 
@@ -217,13 +245,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setButtonProgress() {
         float progress;
         if (brightnessButton.isChecked()) {
-            progress=(brightness + 1) * 100;
+            progress = (brightness + 1) * 100;
             seekbar.setProgress((int) progress);
         } else if (colorButton.isChecked()) {
-            progress=(saturation) * 100;
+            progress = (saturation) * 100;
             seekbar.setProgress((int) progress);
         } else {
-            progress=monocolor*100;
+            progress = monocolor * 100;
             seekbar.setProgress((int) progress);
         }
     }
@@ -242,17 +270,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         float value = progress / 100f - 1;
         if (brightnessButton.isChecked()) {
             brightnessFilter.setBrightness(value);
-            brightness=value;
+            brightness = value;
             Log.i("brillo", value + "");
         } else if (colorButton.isChecked()) {
-            saturation=value+1;
+            saturation = value + 1;
             saturationFilter.setSaturation(saturation);
             Log.i("saturation", value + "");
             if (value >= 0) {
-                contrast=1.5f*value+1;
+                contrast = 1.5f * value + 1;
                 contrastFilter.setContrast(contrast);
             } else {
-                contrast=1;
+                contrast = 1;
                 contrastFilter.setContrast(contrast);
             }
             Log.i("contrast", value + "");
@@ -301,7 +329,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(isChecked){
+        if (isChecked) {
+            if (panX.isChecked() || panY.isChecked()) {
+                upperSeekbar.setProgress(180);
+            } else {
+                upperSeekbar.setProgress(0);
+            }
             scaleButton.setChecked(false);
             rotateButton.setChecked(false);
             panY.setChecked(false);

@@ -59,7 +59,10 @@
         android:id="@+id/surface_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/seekbarRotate" />
+        android:layout_below="@id/seekbarRotate"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/buttonPanel"/>
 
     <SeekBar
         android:id="@+id/seekbar"
