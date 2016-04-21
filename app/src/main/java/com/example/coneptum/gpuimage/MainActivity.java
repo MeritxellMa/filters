@@ -23,7 +23,6 @@ import jp.co.cyberagent.android.gpuimage.GPUImageTransformFilter;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener {
 
     private MyGPUImage mGPUImage;
-    private Button revertButton;
     private ToggleButton brightnessButton;
     private ToggleButton colorButton;
     private ToggleButton monoColorButton;
@@ -46,9 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ToggleButton rotateButton;
     private ToggleButton panXButton;
     private ToggleButton panYButton;
-    private Uri mUri;
     private SeekBar upperSeekbar;
-    private GLSurfaceView glSurfaceView;
     private float[] rotateM = new float[16];
     private float[] scaleM = new float[16];
     private float[] panXM = new float[16];
@@ -59,102 +56,63 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mUri = Uri.parse("android.resource://com.example.coneptum.gpuimage/drawable/image");
+        //init GPU components
         mGPUImage = new MyGPUImage(this);
-        glSurfaceView = (GLSurfaceView) findViewById(R.id.surface_view);
-        mGPUImage.setGLSurfaceView(glSurfaceView);
+        mGPUImage.setGLSurfaceView((GLSurfaceView) findViewById(R.id.surface_view));
         mGPUImage.setScaleType(GPUImage.ScaleType.CENTER_INSIDE);
-        // mGPUImage.setImage(uri); // this loads image on the current thread, should be run in a thread
 
+        //set image
+        Uri mUri = Uri.parse("android.resource://com.example.coneptum.gpuimage/drawable/image");
         mGPUImage.setImage(mUri);
 
-        seekbar = (SeekBar) findViewById(R.id.seekbar);
-        seekbar.setMax(200);
-        seekbar.setOnSeekBarChangeListener(this);
-
+        //**testing scale, translate and rotate**//
+        //set transformation seekBar
         upperSeekbar = (SeekBar) findViewById(R.id.seekbarRotate);
-        upperSeekbar.setMax(360);
-        upperSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (rotateButton.isChecked()) {
-                    degrees = progress;
-                } else if (scaleButton.isChecked()) {
-                    scaleFactor = (float) (progress) / 100 + 1; // de 1 a 4.6
-                    Log.i("scalefactor", scaleFactor + "");
-                } else if (panXButton.isChecked()) {
-                    panX = (float) (progress) / 180-1;
-                    Log.i("panX", panX + "");
-                } else {
-                    panY = (float) (progress) / 180-1;
-                    Log.i("panY", panY + "");
-                }
-                Matrix.setRotateM(rotateM, 0, degrees, 0, 0, -1f);
-                transformFilter.setTransform3D(rotateM);
-                Matrix.scaleM(scaleM, 0, transformFilter.getTransform3D(), 0, scaleFactor, scaleFactor, 1);
-                transformFilter.setTransform3D(scaleM);
-                Matrix.translateM(panXM, 0, transformFilter.getTransform3D(), 0, panX, 0, 0);
-                transformFilter.setTransform3D(panXM);
-                Matrix.translateM(panYM, 0, transformFilter.getTransform3D(), 0, 0, panY, 0);
-                transformFilter.setTransform3D(panYM);
+        if (upperSeekbar != null) {
+            upperSeekbar.setMax(360);
+            upperSeekbar.setOnSeekBarChangeListener(this);
+        }
 
-                applyFilters();
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        revertButton = (Button) findViewById(R.id.revert);
-        brightnessButton = (ToggleButton) findViewById(R.id.brightness);
-        colorButton = (ToggleButton) findViewById(R.id.color);
-        monoColorButton = (ToggleButton) findViewById(R.id.monocolor);
-
-        revertButton.setOnClickListener(this);
-        brightnessButton.setOnClickListener(this);
-        colorButton.setOnClickListener(this);
-        monoColorButton.setOnClickListener(this);
-
-        //testing scale, translate and rotate
+        //set buttons
         scaleButton = (ToggleButton) findViewById(R.id.scale);
         rotateButton = (ToggleButton) findViewById(R.id.rotate);
         panXButton = (ToggleButton) findViewById(R.id.panX);
         panYButton = (ToggleButton) findViewById(R.id.panY);
-
+        //set listeners
         scaleButton.setOnCheckedChangeListener(this);
         rotateButton.setOnCheckedChangeListener(this);
         panXButton.setOnCheckedChangeListener(this);
-        panXButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                float[] prova = transformFilter.getTransform3D();
-                Matrix.translateM(prova, 0, panXM, 0, 100, 0, 0);
-                transformFilter.setTransform3D(prova);
-                applyFilters();
-            }
-        });
         panYButton.setOnCheckedChangeListener(this);
 
+        //**testing filters**//
+        //set filters seekBar
+        seekbar = (SeekBar) findViewById(R.id.seekbar);
+        if (seekbar != null) {
+            seekbar.setMax(200);
+            seekbar.setOnSeekBarChangeListener(this);
+        }
 
-        //filters
+        //init filters
         brightnessFilter = new GPUImageBrightnessFilter();
         saturationFilter = new GPUImageSaturationFilter();
         contrastFilter = new GPUImageContrastFilter();
         transformFilter = new GPUImageTransformFilter();
+        monochromeFilter=new GPUImageMonochromeFilter();
 
+        //set buttons
+        Button revertButton = (Button) findViewById(R.id.revert);
+        brightnessButton = (ToggleButton) findViewById(R.id.brightness);
+        colorButton = (ToggleButton) findViewById(R.id.color);
+        monoColorButton = (ToggleButton) findViewById(R.id.monocolor);
+        //Set listeners
+        if (revertButton != null) {
+            revertButton.setOnClickListener(this);
+        }
+        brightnessButton.setOnClickListener(this);
+        colorButton.setOnClickListener(this);
+        monoColorButton.setOnClickListener(this);
 
-        transformFilter.setTransform3D(rotateM);
-
-        float[] monoInitValues = {0.5f, 0.5f, 0.5f, 1};
-        monochromeFilter = new GPUImageMonochromeFilter(1, monoInitValues);
-
-        //setInitFilterValues();
+        setInitFilterValues();
         setImageGroupFilters();
 
     }
@@ -169,21 +127,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setInitFilterValues() {
+        //brightness
         brightness = 0;
         brightnessFilter.setBrightness(brightness);
+        //color
         saturation = 1;
         saturationFilter.setSaturation(saturation);
         contrast = 1;
         contrastFilter.setContrast(contrast);
+        //monochrome
         monocolor = 0.5f;
         monochromeFilter.setIntensity(1);
         float[] monoInitValues = {0.5f, 0.5f, 0.5f, 1};
         monochromeFilter.setColor(monoInitValues);
+        //transform
         scaleFactor = 1;
-        transformFilter = new GPUImageTransformFilter();
-        upperSeekbar.setProgress(180);
+        degrees=0;
+        panX=0;
+        panY=0;
         Matrix.setRotateM(rotateM, 0, degrees, 0, 0, -1f);
         transformFilter.setTransform3D(rotateM);
+        //seekBars
+        seekbar.setVisibility(View.INVISIBLE);
+        seekbar.setProgress(100);
+        upperSeekbar.setProgress(180);
     }
 
     @Override
@@ -256,31 +223,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        float value = progress / 100f - 1;
-        if (brightnessButton.isChecked()) {
-            brightnessFilter.setBrightness(value);
-            brightness = value;
-            Log.i("brillo", value + "");
-        } else if (colorButton.isChecked()) {
-            saturation = value + 1;
-            saturationFilter.setSaturation(saturation);
-            Log.i("saturation", value + "");
-            if (value >= 0) {
-                contrast = 1.5f * value + 1;
-                contrastFilter.setContrast(contrast);
+        if (seekBar == this.seekbar) {
+
+            float value = progress / 100f - 1;
+
+            if (brightnessButton.isChecked()) {
+                brightnessFilter.setBrightness(value);
+                brightness = value;
+                Log.i("brillo", value + "");
+            } else if (colorButton.isChecked()) {
+                saturation = value + 1;
+                saturationFilter.setSaturation(saturation);
+                Log.i("saturation", value + "");
+                if (value >= 0) {
+                    contrast = 1.5f * value + 1;
+                    contrastFilter.setContrast(contrast);
+                } else {
+                    contrast = 1;
+                    contrastFilter.setContrast(contrast);
+                }
+                Log.i("contrast", value + "");
             } else {
-                contrast = 1;
-                contrastFilter.setContrast(contrast);
-            }
-            Log.i("contrast", value + "");
-        } else {
            /* monocolor=value+1;
             monochromeFilter.setIntensity(1);
             float monoValue = monocolor;
             float[] monoValues = {monoValue, monoValue, monoValue, monoValue};
             monochromeFilter.setColor(monoValues);*/
-        }
-        /*
+            }
+        /* TONI'S CODE
         if (colorVal >=0){
             self.saturationFilter.saturation=1+colorVal;
             self.contrastFilter.contrast=1+3*colorVal*0.5;
@@ -289,6 +259,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             self.saturationFilter.saturation=1+colorVal;
         }
          */
+        } else {
+            if (rotateButton.isChecked()) {
+                degrees = progress;
+            } else if (scaleButton.isChecked()) {
+                scaleFactor = (float) (progress) / 100 + 1; // de 1 a 4.6
+                Log.i("scalefactor", scaleFactor + "");
+            } else if (panXButton.isChecked()) {
+                panX = (float) (progress) / 180 - 1;
+                Log.i("panX", panX + "");
+            } else {
+                panY = (float) (progress) / 180 - 1;
+                Log.i("panY", panY + "");
+            }
+            Matrix.setRotateM(rotateM, 0, degrees, 0, 0, -1f);
+            transformFilter.setTransform3D(rotateM);
+            Matrix.scaleM(scaleM, 0, transformFilter.getTransform3D(), 0, scaleFactor, scaleFactor, 1);
+            transformFilter.setTransform3D(scaleM);
+            Matrix.translateM(panXM, 0, transformFilter.getTransform3D(), 0, panX, 0, 0);
+            transformFilter.setTransform3D(panXM);
+            Matrix.translateM(panYM, 0, transformFilter.getTransform3D(), 0, 0, panY, 0);
+            transformFilter.setTransform3D(panYM);
+        }
 
         applyFilters();
     }
