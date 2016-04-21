@@ -39,10 +39,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private float contrast;
     private float monocolor;
     private float degrees;
+    private float scaleFactor;
+    private float panY;
+    private float panX;
     private ToggleButton scaleButton;
     private ToggleButton rotateButton;
-    private ToggleButton panX;
-    private ToggleButton panY;
+    private ToggleButton panXButton;
+    private ToggleButton panYButton;
     private Uri mUri;
     private SeekBar upperSeekbar;
     private GLSurfaceView glSurfaceView;
@@ -76,48 +79,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (rotateButton.isChecked()) {
                     degrees = progress;
-                    Matrix.setRotateM(rotateM, 0, progress, 0, 0, -1f);
-                    transformFilter.setTransform3D(rotateM);
                 } else if (scaleButton.isChecked()) {
-                    //TODO aixo esta pq si no existeix transform3d fa coses molt rares---ineficient...boolean?
-                    if (degrees == 0) {
-                        Matrix.setRotateM(rotateM, 0, 0, 0, 0, -1f);
-                        transformFilter.setTransform3D(rotateM);
-                    }
-
-                    float scaleFactor = (float) (progress) / 100 + 1; // de 1 a 4.6
+                    scaleFactor = (float) (progress) / 100 + 1; // de 1 a 4.6
                     Log.i("scalefactor", scaleFactor + "");
-                    Matrix.scaleM(scaleM, 0, transformFilter.getTransform3D(), 0, scaleFactor, scaleFactor, 1);
-                    transformFilter.setTransform3D(scaleM);
-                } else if (panX.isChecked()) {
-                    //TODO aixo esta pq si no existeix transform3d fa coses molt rares---ineficient...boolean?
-                    if (degrees == 0) {
-                        Matrix.setRotateM(rotateM, 0, 0, 0, 0, -1f);
-                        transformFilter.setTransform3D(rotateM);
-                    }
-
-                    float panX = (float) (progress) / 180 - 1;
+                } else if (panXButton.isChecked()) {
+                    panX = (float) (progress) / 180-1;
                     Log.i("panX", panX + "");
-                    Matrix.translateM(panXM, 0, transformFilter.getTransform3D(), 0, panX, 0, 0);
-                    transformFilter.setTransform3D(panXM);
-
-                }else{
-                    //TODO aixo esta pq si no existeix transform3d fa coses molt rares---ineficient...boolean?
-                    if (degrees == 0) {
-                        Matrix.setRotateM(rotateM, 0, 0, 0, 0, -1f);
-                        transformFilter.setTransform3D(rotateM);
-                    }
-                    float panY = (float) (progress) / 180 - 1;
+                } else {
+                    panY = (float) (progress) / 180-1;
                     Log.i("panY", panY + "");
-                    Matrix.translateM(panYM, 0, transformFilter.getTransform3D(), 0, 0, panY, 0);
-                    transformFilter.setTransform3D(panYM);
                 }
+                Matrix.setRotateM(rotateM, 0, degrees, 0, 0, -1f);
+                transformFilter.setTransform3D(rotateM);
+                Matrix.scaleM(scaleM, 0, transformFilter.getTransform3D(), 0, scaleFactor, scaleFactor, 1);
+                transformFilter.setTransform3D(scaleM);
+                Matrix.translateM(panXM, 0, transformFilter.getTransform3D(), 0, panX, 0, 0);
+                transformFilter.setTransform3D(panXM);
+                Matrix.translateM(panYM, 0, transformFilter.getTransform3D(), 0, 0, panY, 0);
+                transformFilter.setTransform3D(panYM);
+
                 applyFilters();
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
@@ -139,13 +124,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //testing scale, translate and rotate
         scaleButton = (ToggleButton) findViewById(R.id.scale);
         rotateButton = (ToggleButton) findViewById(R.id.rotate);
-        panX = (ToggleButton) findViewById(R.id.panX);
-        panY = (ToggleButton) findViewById(R.id.panY);
+        panXButton = (ToggleButton) findViewById(R.id.panX);
+        panYButton = (ToggleButton) findViewById(R.id.panY);
 
         scaleButton.setOnCheckedChangeListener(this);
         rotateButton.setOnCheckedChangeListener(this);
-        panX.setOnCheckedChangeListener(this);
-        panX.setOnClickListener(new View.OnClickListener() {
+        panXButton.setOnCheckedChangeListener(this);
+        panXButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 float[] prova = transformFilter.getTransform3D();
@@ -154,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 applyFilters();
             }
         });
-        panY.setOnCheckedChangeListener(this);
+        panYButton.setOnCheckedChangeListener(this);
 
 
         //filters
@@ -171,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //setInitFilterValues();
         setImageGroupFilters();
+
     }
 
     private void setImageGroupFilters() {
@@ -179,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         imageFilterGroup.addFilter(brightnessFilter);
         imageFilterGroup.addFilter(saturationFilter);
         imageFilterGroup.addFilter(contrastFilter);
+        applyFilters();
     }
 
     private void setInitFilterValues() {
@@ -192,9 +179,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         monochromeFilter.setIntensity(1);
         float[] monoInitValues = {0.5f, 0.5f, 0.5f, 1};
         monochromeFilter.setColor(monoInitValues);
-        transformFilter.onDestroy();
+        scaleFactor = 1;
         transformFilter = new GPUImageTransformFilter();
         upperSeekbar.setProgress(180);
+        Matrix.setRotateM(rotateM, 0, degrees, 0, 0, -1f);
+        transformFilter.setTransform3D(rotateM);
     }
 
     @Override
@@ -330,16 +319,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
-            if (panX.isChecked() || panY.isChecked()) {
-                upperSeekbar.setProgress(180);
-            } else {
-                upperSeekbar.setProgress(0);
-            }
             scaleButton.setChecked(false);
             rotateButton.setChecked(false);
-            panY.setChecked(false);
-            panX.setChecked(false);
+            panYButton.setChecked(false);
+            panXButton.setChecked(false);
             buttonView.setChecked(true);
+            if (rotateButton.isChecked()) {
+                upperSeekbar.setProgress((int) degrees);
+            } else if (scaleButton.isChecked()) {
+                upperSeekbar.setProgress((int) ((scaleFactor - 1) * 100));
+            } else if (panXButton.isChecked()) {
+                upperSeekbar.setProgress((int) ((panX + 1) * 180));
+            } else {
+                upperSeekbar.setProgress((int) ((panY + 1) * 180));
+            }
         }
     }
 }
