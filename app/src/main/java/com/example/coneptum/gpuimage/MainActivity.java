@@ -150,9 +150,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         degrees = 0;
         Matrix.setRotateM(rotateM, 0, degrees, 0, 0, -1f);
         transformFilter.setTransform3D(rotateM);
-        //seekbars
-        upperSeekbar.setProgress(180);
-        seekbar.setProgress(100);
     }
 
     @Override
